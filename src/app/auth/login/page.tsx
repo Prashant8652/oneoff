@@ -1,7 +1,6 @@
 'use client'
-// src/app/auth/login/page.tsx
 import { useState } from 'react'
-import { createSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -9,18 +8,31 @@ import { motion } from 'framer-motion'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isRegister, setIsRegister] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
-  const supabase = createSupabaseClient()
 
-  async function handleLogin(e: React.FormEvent) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); setLoading(false) }
-    else router.push('/drop')
+
+    if (isRegister) {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) { setError(error.message); setLoading(false); return }
+      setError('Check your email to confirm your account!')
+      setLoading(false)
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) { setError(error.message); setLoading(false); return }
+      router.push('/admin')
+    }
   }
 
   return (
@@ -35,12 +47,14 @@ export default function LoginPage() {
           ONE/OFF
         </Link>
 
-        <h1 className="font-display text-[3rem] leading-none mb-2">SIGN IN</h1>
+        <h1 className="font-display text-[3rem] leading-none mb-2">
+          {isRegister ? 'CREATE ACCOUNT' : 'SIGN IN'}
+        </h1>
         <p className="font-mono text-[0.65rem] tracking-widest uppercase text-white/35 mb-10">
-          Access your archive & drops
+          {isRegister ? 'Join the archive' : 'Access your drops'}
         </p>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"
             required
@@ -59,7 +73,7 @@ export default function LoginPage() {
           />
 
           {error && (
-            <p className="font-mono text-[0.6rem] text-red-400 tracking-wider">{error}</p>
+            <p className="font-mono text-[0.6rem] text-white/60 tracking-wider">{error}</p>
           )}
 
           <button
@@ -67,16 +81,16 @@ export default function LoginPage() {
             disabled={loading}
             className="font-mono text-[0.75rem] tracking-widest uppercase bg-white text-black py-4 mt-2 hover:bg-black hover:text-white border border-white transition-all duration-300 disabled:opacity-40"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Sign In'}
           </button>
         </form>
 
-        <p className="font-mono text-[0.6rem] tracking-widest text-white/30 mt-8 text-center">
-          New here?{' '}
-          <Link href="/auth/register" className="text-white/60 hover:text-white underline underline-offset-4 transition-colors">
-            Create account
-          </Link>
-        </p>
+        <button
+          onClick={() => setIsRegister(!isRegister)}
+          className="font-mono text-[0.6rem] tracking-widest text-white/30 mt-8 text-center w-full hover:text-white/60 transition-colors"
+        >
+          {isRegister ? 'Already have an account? Sign in' : "New here? Create account"}
+        </button>
       </motion.div>
     </div>
   )
