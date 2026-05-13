@@ -1,5 +1,4 @@
 'use client'
-// src/components/drop/Countdown.tsx
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCountdown } from '@/hooks/useCountdown'
 
@@ -27,9 +26,9 @@ function CountdownDigit({ value }: { value: string }) {
 }
 
 export function Countdown({ expiresAt }: CountdownProps) {
-  const { hours, minutes, seconds, isExpired } = useCountdown(expiresAt)
+  const { hours, minutes, seconds, total } = useCountdown(expiresAt)
 
-  if (isExpired) {
+  if (total === 0) {
     return (
       <p className="font-mono text-[0.65rem] tracking-widest uppercase text-white/50">
         Design Retired — Gone Forever
@@ -48,7 +47,6 @@ export function Countdown({ expiresAt }: CountdownProps) {
         Design Retires In
       </p>
       <div className="flex items-end gap-2">
-        {/* Hours */}
         <div className="text-center">
           <div className="flex">
             <CountdownDigit value={h[0]} />
@@ -57,7 +55,6 @@ export function Countdown({ expiresAt }: CountdownProps) {
           <span className="font-mono text-[0.55rem] tracking-widest uppercase opacity-35 block mt-1">Hrs</span>
         </div>
         <span className="font-display text-[3.5rem] opacity-20 leading-none pb-1">:</span>
-        {/* Minutes */}
         <div className="text-center">
           <div className="flex">
             <CountdownDigit value={m[0]} />
@@ -66,7 +63,6 @@ export function Countdown({ expiresAt }: CountdownProps) {
           <span className="font-mono text-[0.55rem] tracking-widest uppercase opacity-35 block mt-1">Min</span>
         </div>
         <span className="font-display text-[3.5rem] opacity-20 leading-none pb-1">:</span>
-        {/* Seconds */}
         <div className="text-center">
           <div className="flex">
             <CountdownDigit value={s[0]} />
