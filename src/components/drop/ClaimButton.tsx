@@ -74,10 +74,10 @@ export function ClaimButton({ drop, selectedSize, userId }: ClaimButtonProps) {
           setSerial(serialNumber)
           setState('success')
         },
-        modal: {
-          ondismiss: () => {
-            if (state === 'processing') setState('idle')
-          },
+       modal: {
+  ondismiss: () => {
+    setState('idle')
+  },
         },
       })
     } catch (err: any) {
