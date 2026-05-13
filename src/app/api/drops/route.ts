@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createDrop, supabaseAdmin } from '@/lib/supabase'
-import { cookies } from 'next/headers'
-import { createPagesServerClient } from '@supabase/auth-helpers-nextjs'
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies()
-    const supabase = createPagesServerClient(
-      { req: req as any, res: {} as any },
-      {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      }
-    )
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const { data: profile } = await supabaseAdmin
       .from('users')
@@ -35,9 +34,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const { data } = await supabaseAdmin
-    .from('drops')
-    .select('*')
-    .order('drop_number', { ascending: false })
-  return NextResponse.json(data ?? [])
+  try {
+    const { data } = await supabaseAdmin
+      .from('drops')
+      .select('*')
+      .order('drop_number', { ascending: false })
+    return NextResponse.json(data ?? [])
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }
