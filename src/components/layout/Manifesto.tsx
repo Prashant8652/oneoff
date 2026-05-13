@@ -3,7 +3,7 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 
 export function Manifesto() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
@@ -14,12 +14,16 @@ export function Manifesto() {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
         className="font-display text-[clamp(2.5rem,5.5vw,6rem)] leading-[0.95] max-w-4xl mx-auto mb-10 tracking-wide"
       >
-        Fashion was never meant{' '}
-        <em className="not-italic font-body font-light text-[0.75em] opacity-60">
-          to be repeated.
-        </em>{' '}
-        We made sure of that.
+        Fashion was never meant to be repeated. We made sure of that.
       </motion.h2>
       <motion.p
         initial={{ opacity: 0 }}
-        animate={inView ? { opacity:
+        animate={inView ? { opacity: 0.3 } : {}}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="font-mono text-[0.7rem] tracking-widest uppercase"
+      >
+        ONE/OFF — Est. 2023 — Mumbai, India
+      </motion.p>
+    </section>
+  )
+}
